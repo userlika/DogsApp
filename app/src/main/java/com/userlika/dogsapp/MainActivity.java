@@ -54,8 +54,19 @@ public class MainActivity extends AppCompatActivity {
 
                     // Для считывания целой строки
                     BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                    String result = bufferedReader.readLine();
-                    Log.d("MainActivity", "Result: " + result);
+
+                    StringBuilder data = new StringBuilder();
+                    String result;
+
+                    do {
+                        result = bufferedReader.readLine();
+                        if (result != null) {
+                            data.append(result);
+                        }
+
+                    } while (result != null);
+
+                    Log.d("MainActivity", "Result: " + data);
                 } catch (Exception e) {
                     Log.d("MainActivity", "Error: " + e.toString());
                 }
