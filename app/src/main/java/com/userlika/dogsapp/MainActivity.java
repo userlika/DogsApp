@@ -8,6 +8,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 
 import org.json.JSONObject;
 
@@ -19,7 +21,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
-    private static final String BASE_URL = "https://dog.ceo/api/breeds/image/random";
+    private MainViewModel viewModel;
+    private static final String TAG = "MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,55 +34,17 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        viewModel = new ViewModelProvider(this).get(MainViewModel.class);
+        viewModel.loadDogImage();
 
-        loadDogImage();
-    }
-
-    private void loadDogImage(){
-        new Thread(new Runnable() {
+        viewModel.getDogImage().observe(this, new Observer<DogImage>() {
             @Override
-            public void run() {
-                // При работе с интернетом адрес используется не в виде строки, а в виде объекта URL
-                // Ctrl+Alt+T для добавления try catch
-                try {
-                    URL url = new URL(BASE_URL);
-                    // openConnection() возвращает родительский тип URLConnection,
-                    // HttpURLConnection - дочерний класс, поэтому нужно явное преобразование
-                    HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+            public void onChanged(DogImage dogImage) {
+                Log.d(TAG, dogImage.toString());
 
-                    // Объект InputStream используется для считывания данных из инета или файлов
-                    // В таком случае ответ считывается побайтово
-                    InputStream inputStream = urlConnection.getInputStream();
-
-                    // Считывание посимвольно
-                    InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-
-                    // Для считывания целой строки
-                    BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-                    StringBuilder data = new StringBuilder();
-                    String result;
-
-                    do {
-                        result = bufferedReader.readLine();
-                        if (result != null) {
-                            data.append(result);
-                        }
-
-                    } while (result != null);
-
-                    JSONObject jsonObject = new JSONObject(data.toString());
-                    String message = jsonObject.getString("message");
-                    String status = jsonObject.getString("status");
-
-                    DogImage dogImage = new DogImage(message, status);
-
-                    Log.d("MainActivity", "Result: " + dogImage.toString());
-                } catch (Exception e) {
-                    Log.d("MainActivity", "Error: " + e.toString());
-                }
             }
-        }).start();
+        });
 
     }
+
 }
