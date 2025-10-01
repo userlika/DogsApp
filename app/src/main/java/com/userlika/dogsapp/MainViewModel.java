@@ -93,43 +93,7 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     private Single<DogImage> loadImageRx(){
-        return Single.fromCallable(new Callable<DogImage>() {
-            @Override
-            public DogImage call() throws Exception {
-
-                URL url = new URL(BASE_URL);
-                // openConnection() возвращает родительский тип URLConnection,
-                // HttpURLConnection - дочерний класс, поэтому нужно явное преобразование
-                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-
-                // Объект InputStream используется для считывания данных из инета или файлов
-                // В таком случае ответ считывается побайтово
-                InputStream inputStream = urlConnection.getInputStream();
-
-                // Считывание посимвольно
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-
-                // Для считывания целой строки
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-                StringBuilder data = new StringBuilder();
-                String result;
-
-                do {
-                    result = bufferedReader.readLine();
-                    if (result != null) {
-                        data.append(result);
-                    }
-
-                } while (result != null);
-
-                JSONObject jsonObject = new JSONObject(data.toString());
-                String message = jsonObject.getString(KEY_MESSAGE);
-                String status = jsonObject.getString(KEY_STATUS);
-
-                return new DogImage(message, status);
-                }
-        });
+        return ApiFactory.getApiService().loadDogImage();
     }
 
     @Override
